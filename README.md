@@ -1,10 +1,18 @@
 # Public Key Infratructure with OpenSSL
 
-Originally, I created this public key infrastructure for my homelab. I tried to concatenate many documentations and best practices. I have no intention of using these configurations in production. At least not for the moment. Comments are welcome.
+## Summary
+[Public Key Infratructure with OpenSSL](#public-key-infratructure-with-openSSL)
+- [Introduction](#introduction)
+- [Generate infrastructure files and folders](#generate-infrastructure-files-and-folders)
+- [Generate root-ca and sub-ca public keys](#generate-root-ca-and-sub-ca-public-keys)
+- [Generate root-ca public certificate](#generate-root-ca-public-certificate)
+
+## Introduction
+Originally, the goal was to create a solid Public Key Infrastructure for my homelab. I tried to concatenate many documentations and best practices. I don't advise using these configurations in production. At least not for the moment. Comments are welcome.
 
 I assume that these configuration files are based on this infrastructure:
 ```Bash
-# tree ca
+# tree /root/ca/
 ca
 ├── root-ca
 │   ├── certs
@@ -24,6 +32,7 @@ ca
 │   ├── newcerts
 │   ├── private
 │   └── server_template.conf
+│   └── client_template.conf
 ├── sub-ca
 │   ├── certs
 │   │   └── sub-ca.crt
@@ -38,7 +47,7 @@ ca
 ```
 ## Generate infrastructure files and folders
 ```Bash
-# /root
+# root/
 mkdir -p ca/{root-ca,sub-ca,server}/{private,certs,newcerts,crl,csr}
 
 # Modify private folders permissions
@@ -52,7 +61,7 @@ openssl rand -hex 16 > ca/sub-ca/serial
 ```
 ## Generate root-ca and sub-ca public keys
 ```Bash
-# /root
+# root/
 # Generate root-ca and sub-ca private keys
 openssl genrsa -aes256 -out root-ca/private/ca.key 4096
 openssl genrsa -aes256 -out sub-ca/private/sub-ca.key 4096
