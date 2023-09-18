@@ -1,16 +1,19 @@
 # Public Key Infratructure with OpenSSL
 
-## Summary
-[Public Key Infratructure with OpenSSL](#public-key-infratructure-with-openSSL)
+
+[Summary](#summary)
 - [Introduction](#introduction)
 - [Create infrastructure files and folders](#create-infrastructure-files-and-folders)
 - [Generate root-ca and sub-ca public keys](#generate-root-ca-and-sub-ca-public-keys)
 - [Generate root-ca public certificate](#create-root-ca-public-certificate)
 - [Create a certificate request for sub-ca](#generate-a-certificate-request-for-sub-ca)
 - [Generate sub-ca public certificate from csr](#Generate-sub-ca-public-certificate-from-csr)
+    - [Verify the certificate request](#verify-the-certificate-request)
 - [Create a private key for a server](#create-a-private-key-for-a-server)
 - [Create a certificate request for a server from a config file](#create-a-certificate-request-for-a-server-from-a-config-file)
 - [Sign a certificate request for a server with a config file](#sign-a-certificate-request-for-a-server-with-a-config-file)
+    - [Verify the signed certificate](#verify-the-signed-certificate)
+
 
 ## Introduction
 Originally, the goal was to create a solid **Public Key Infrastructure** for my homelab. I tried to concatenate many documentations and best practices. I don't advise using these configurations in production. At least not for the moment. Comments are welcome.
@@ -109,6 +112,12 @@ openssl genrsa -aes256 -out private/server.key 2048
 openssl req -new -key private/server.key -out csr/sever.csr -config csr.conf
 ```
 
+### Verify the certificate request
+```Bash
+# ca/server/
+openssl req  -noout -text -in certs/server.csr
+```
+
 ## Sign a certificate request for a server with a config file
 ```Bash
 # ca/sub-ca/
@@ -122,6 +131,14 @@ openssl ca -config sub-ca.conf -days 365 -notext -in ../server/csr/server.csr \
 openssl x509 -req -in ../server/csr/server.csr  -CA certs/sub-ca.crt -CAkey private/sub-ca.key \
 -out ../server/certs/server.crt -days 365 -extensions v3_ext -extfile ../server/csr.conf -sha256
 ```
+
+### Verify the signed certificate
+```Bash
+# ca/server/
+openssl x509  -noout -text -in certs/server.crt
+```
+
+
 
 
 
