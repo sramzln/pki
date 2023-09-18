@@ -73,7 +73,6 @@ openssl rand -hex 16 > ca/sub-ca/serial
 ## Generate root-ca and sub-ca public keys
 ```Bash
 # root/ca/
-# Generate root-ca and sub-ca private keys
 openssl genrsa -aes256 -out root-ca/private/ca.key 4096
 openssl genrsa -aes256 -out sub-ca/private/sub-ca.key 4096
 ```
@@ -120,7 +119,7 @@ openssl ca -config sub-ca.conf -days 365 -notext -in ../server/csr/server.csr \
 
 ```Bash
 # ca/sub-ca/
-openssl x509 -req -in ../server/csr/server.csr  -CA cert/sub-ca.crt -CAkey private/sub-ca.key \
+openssl x509 -req -in ../server/csr/server.csr  -CA certs/sub-ca.crt -CAkey private/sub-ca.key \
 -out ../server/certs/server.crt -days 365 -extensions v3_ext -extfile ../server/csr.conf -sha256
 ```
 
