@@ -13,7 +13,9 @@
 - [Create a certificate request for a server from a config file](#create-a-certificate-request-for-a-server-from-a-config-file)
 - [Sign a certificate request for a server with a config file](#sign-a-certificate-request-for-a-server-with-a-config-file)
     - [Verify the signed certificate](#verify-the-signed-certificate)
+- [Add root-ca certificate to linux](#add-root-ca-certificate-to-linux)
 
+- [Add SSL certificate to Nginx](#add-ssl-certificate-to-nginx)
 
 ## Introduction
 Originally, the goal was to create a solid **Public Key Infrastructure** for my homelab. I tried to concatenate many documentations and best practices. I don't advise using these configurations in production. At least not for the moment. Comments are welcome.
@@ -64,7 +66,7 @@ I assume that these configuration files are based on this infrastructure:
 mkdir -p ca/{root-ca,sub-ca,server}/{private,certs,newcerts,crl,csr}
 
 # Modify private folders permissions
-chmod -v 700 ca/{root-ca,sub-ca,server}/private
+chmod -v 400 ca/{root-ca,sub-ca,server}/private
 
 # Generate index files
 # This is a file containing a unique identifier which will be
@@ -138,7 +140,41 @@ openssl x509 -req -in ../server/csr/server.csr  -CA certs/sub-ca.crt -CAkey priv
 openssl x509  -noout -text -in certs/server.crt
 ```
 
+## Add root-ca certificate to linux
+```Bash
+# Solution 1°
+sudo trust anchor --store ca.crt
+# Solution 2°
+# Copy your root certificate to this location and execute
+sudo cp ca.crt /etc/ca-certificates/trust-source/anchors/
+sudo update-ca-trust
+```
 
+## Add SSL certificate to Nginx
+A standard Nginx SSL configuration is something like this:
+```bash
+server {
+        listen       443 ssl;
+        # You can add multiple servers separated by a comma. 
+        server_name  your.domain.name;
 
+        ssl_certificate      /path/to/bundle.crt # (or server);
+        ssl_certificate_key  /path/to/server.key;
+
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+
+        ssl_ciphers  HIGH:!aNULL:!MD5;
+        ssl_prefer_server_ciphers  on;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+    }
+
+```
+ To have a trusted certificate chain we create a bundle with our server and sub-ca authority certificate:
+ `cat server.crt sub-ca.crt > bundle.crt`
 
 
